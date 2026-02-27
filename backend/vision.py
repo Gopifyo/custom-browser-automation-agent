@@ -18,16 +18,21 @@ class VisionExtractor:
         """
         print(f"👁️ Vision Agent analyzing: {image_path}")
         
-        # 1. Load the image/file
+
+        # 1. Determine Mime Type
+        file_ext = os.path.splitext(image_path)[1].lower()
+        mime_type = "application/pdf" if file_ext == ".pdf" else "image/jpeg"
+
+        # 2. Load the image/file
         # In a real app, handle PDF->Image conversion or direct PDF upload
-        # For hackathon simplicity, we assume image_path is a local file (jpg/png)
+        # For hackathon simplicity, we assume image_path is a local file (jpg/png/pdf)
         if not os.path.exists(image_path):
              return {"error": "File not found"}
 
         with open(image_path, "rb") as f:
-            image_data = f.read()
+            file_data = f.read()
 
-        # 2. Construct the Prompt with JSON Schema enforcement
+        # 3. Construct the Prompt with JSON Schema enforcement
         prompt = """
         You are an expert Trade Compliance Officer. Analyze this shipping invoice or ERP screen capture.
         Extract the following fields strictly as JSON:
@@ -44,10 +49,10 @@ class VisionExtractor:
         """
         
         try:
-            # 3. Call Gemini
+            # 4. Call Gemini
             response = self.model.generate_content(
                 [
-                    {"mime_type": "image/jpeg", "data": image_data},
+                    {"mime_type": mime_type, "data": file_data},
                     prompt
                 ],
                 generation_config=genai.GenerationConfig(
